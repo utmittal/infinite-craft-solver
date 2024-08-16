@@ -57,7 +57,7 @@ elements = set()
 for recipe in recipes:
     elements.update(recipe)
 elements = list(elements)
-# print(elements)
+print("Total Elements: " + str(len(elements)))
 
 # generate matrice
 icmat = pd.DataFrame(index=elements, columns=elements)
@@ -184,5 +184,5 @@ def print_missing_combos():
         input()
 
 # print_all_iterations()
-find_shortest_path_to("Human")
+find_shortest_path_to("Sharknado 7")
 # print_missing_combos()
