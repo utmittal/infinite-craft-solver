@@ -1,3 +1,4 @@
+import itertools
 import json
 import base64
 from urllib.parse import unquote
@@ -15,7 +16,8 @@ for filename in os.listdir(har_directory):
             net_logs = json.load(f)
             entries.extend(net_logs["log"]["entries"])
 
-recipes = []
+recipes = {}
+elements = set()
 # parse all entries
 count = 0
 for entry in entries:
@@ -46,37 +48,35 @@ for entry in entries:
             exit(1)
     result = json.loads(result_json)["result"]
 
+    # if result is Nothing, we don't add it to recipes. This makes future lookups simpler
+    if result == "Nothing":
+        continue
+
     # resolve url characters
-    recipes.append([unquote(w) for w in [first,second,result]])
+    combo = tuple(unquote(w) for w in (first,second,result))
+    if (combo[0], combo[1]) in recipes.keys() and recipes[(combo[0], combo[1])] != combo[2]:
+        print("Found differing recipes.")
+        exit(1)
+    if (combo[1], combo[0]) in recipes.keys() and recipes[(combo[1], combo[0])] != combo[2]:
+        print("Found differing recipes.")
+        exit(1)
+    recipes[(combo[0], combo[1])] = combo[2]
+    recipes[(combo[1], combo[0])] = combo[2]
+    elements.update(combo)
 
     # count for debugging purposes only
     count = count+1
 # print(recipes)
 
-# create source of truth list
-elements = set()
-for recipe in recipes:
-    elements.update(recipe)
-elements = list(elements)
 print("Total Elements: " + str(len(elements)))
+print("Total Recipes: " + str(len(recipes)/2))
 
-# generate matrice
-icmat = pd.DataFrame(index=elements, columns=elements)
-icmat = icmat.fillna("")
-for recipe in recipes:
-    if icmat.at[recipe[0],recipe[1]] != recipe[2] and icmat.at[recipe[0],recipe[1]] != "":
-        print("Found differing recipes.")
-        exit(1)
-    if icmat.at[recipe[1], recipe[0]] != recipe[2] and icmat.at[recipe[1], recipe[0]] != "":
-        print("Found differing recipes.")
-        exit(1)
-    icmat.at[recipe[0],recipe[1]] = recipe[2]
-    icmat.at[recipe[1], recipe[0]] = recipe[2]
-# print(icmat)
-# print("Fire + Water = " + icmat.at["Fire","Water"])
+starting_elements = {"Water", "Fire", "Wind", "Earth"}
 
-def print_all_iterations():
-    starting_elements = {"Water", "Fire", "Wind", "Earth"}
+def print_all_iterations(interactive = False):
+    if interactive:
+        print("Type q to quit.")
+
     # gen graph step by step
     curr_elements = starting_elements.copy()
     print("Iteration 0")
@@ -84,6 +84,7 @@ def print_all_iterations():
 
     inp = "something"
     iteration = 0
+    already_checked = set()
     while inp != "q":
         iteration += 1
 
@@ -91,10 +92,14 @@ def print_all_iterations():
         new_elements = set()
         for fe in curr_elements:
             for se in curr_elements:
-                res = icmat.at[fe, se]
-                if res != "Nothing" and res != "" and res not in curr_elements and res not in new_elements:
-                    reactions.append(fe + " + " + se + " = " + res)
-                    new_elements.add(res)
+                fese = (fe,se)
+                if fese not in already_checked and fese in recipes:
+                    res = recipes[(fe,se)]
+                    if res not in curr_elements and res not in new_elements:
+                        reactions.append(fe + " + " + se + " = " + res)
+                        new_elements.add(res)
+                        already_checked.add((fe,se))
+                        already_checked.add((se,fe))
 
         print("Iteration " + str(iteration))
         print("\tStarting Elements: " + str(curr_elements))
@@ -107,86 +112,95 @@ def print_all_iterations():
         if len(new_elements) == 0:
             print("No more new elements.")
             break
-        # else:
-        #     inp = input()
+        else:
+            if interactive:
+                inp = input()
 
 def find_shortest_path_to(destination):
-    starting_elements = ["Water", "Fire", "Wind", "Earth"]
-
-    curr_elements = starting_elements.copy()
-    curr_elements_path = [[()] for _ in range(len(starting_elements))]
+    curr_elements = {}
+    for el in starting_elements:
+        curr_elements[el] = [()]
 
     print("Iteration 0")
-    print(curr_elements)
+    print(curr_elements.keys())
 
     iteration = 0
+    already_checked = set()
     while True:
         iteration += 1
 
-        new_elements = []
-        new_elements_path = []
-        for fe in zip(curr_elements,curr_elements_path, strict=True):
-            for se in zip(curr_elements,curr_elements_path, strict=True):
-                res = icmat.at[fe[0], se[0]]
-                if res != "Nothing" and res != "" and res not in curr_elements and res not in new_elements:
-                    new_elements.append(res)
-                    result_reaction = (fe[0],se[0],res)
+        new_elements = {}
+        for fe in curr_elements:
+            for se in curr_elements:
+                fese = (fe, se)
+                if fese not in already_checked and fese in recipes:
+                    res = recipes[(fe,se)]
+                    if res not in curr_elements and res not in new_elements:
+                        # gen path to result
+                        path_to_new_element = curr_elements[fe].copy()
+                        # insert at the right places
+                        for ser in curr_elements[se]:
+                            if ser not in path_to_new_element:
+                                found_first = False
+                                found_second = False
+                                for i in range(len(path_to_new_element)):
+                                    r = path_to_new_element[i]
+                                    if r == ():
+                                        continue
+                                    if r[2] == ser[0]:
+                                        found_first = True
+                                    if r[2] == ser[1]:
+                                        found_second = True
+                                    if found_first and found_second:
+                                        path_to_new_element.insert(i + 1, ser)
+                                        break
+                                if found_first == False or found_second == False:
+                                    path_to_new_element.append(ser)
+                        # add current recipe to path
+                        path_to_new_element.append((fe,se,res))
+                        # add result to new elements
+                        new_elements[res] = path_to_new_element
 
-                    path_to_new_element = fe[1].copy()
-                    # insert at the right places
-                    for ser in se[1]:
-                        if ser not in path_to_new_element:
-                            found_first = False
-                            found_second = False
-                            for i in range(len(path_to_new_element)):
-                                r = path_to_new_element[i]
-                                if r == ():
-                                    continue
-                                if r[2] == ser[0]:
-                                    found_first = True
-                                if r[2] == ser[1]:
-                                    found_second = True
-                                if found_first and found_second:
-                                    path_to_new_element.insert(i+1,ser)
-                                    break
-                            if found_first == False or found_second == False:
-                                path_to_new_element.append(ser)
-                    path_to_new_element.append(result_reaction)
-                    new_elements_path.append(path_to_new_element)
+                        already_checked.add((fe,se))
+                        already_checked.add((se,fe))
 
         print("Iteration " + str(iteration))
-        print("\tStarting Elements: " + str(curr_elements))
-        print("\tNew Elements: " + str(new_elements))
-        # print("\tNew Element Paths" + str(new_elements_path))
+        print("\tStarting Elements: " + str(curr_elements.keys()))
+        print("\tNew Elements: " + str(new_elements.keys()))
+        # print("\tNew Element Paths" + str(new_elements))
 
         if destination in new_elements:
-            destination_index = new_elements.index(destination)
             print("")
-            print('Created "' + destination + '" in ' + str(len(new_elements_path[destination_index])-1) + ' steps.')
+            print('Created "' + destination + '" in ' + str(len(new_elements[destination])-1) + ' steps.')
             print("Reactions: ")
-            for reaction in new_elements_path[destination_index]:
+            for reaction in new_elements[destination]:
                 if not reaction:
                     continue
                 print("\t" + reaction[0] + " + " + reaction[1] + " = " + reaction[2])
             break
 
-        curr_elements = curr_elements + new_elements
-        curr_elements_path = curr_elements_path + new_elements_path
+        curr_elements = curr_elements | new_elements    # merge dicts
 
         if len(new_elements) == 0:
             print("No more new elements.")
             break
 
-def print_missing_combos():
+def print_missing_combos(interactive = False):
+    if interactive:
+        print("Type q to quit")
+
+    checked = set()
     for first_el in elements:
         for second_el in elements:
-            if icmat.at[first_el,second_el] == "":
+            if (first_el,second_el) not in recipes:
                 print(first_el + " + " + second_el + " = ???")
-        input()
+        if interactive:
+            if input() == "q":
+                break
 
 start = time.time()
 print_all_iterations()
-# find_shortest_path_to("Ring")
+# find_shortest_path_to("Sharktopusnado 9688")
 # print_missing_combos()
 end = time.time()
 print(end-start)
