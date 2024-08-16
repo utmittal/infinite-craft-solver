@@ -184,5 +184,5 @@ def print_missing_combos():
         input()
 
 # print_all_iterations()
-find_shortest_path_to("Sharknado 7")
+find_shortest_path_to("Obsidian")
 # print_missing_combos()
