@@ -33,7 +33,7 @@ for entry in entries:
     if response["status"] != 200:
         # we haven't seen this before, investigate
         print(response)
-        break
+        exit(1)
 
     content = response["content"]
     result_json = content["text"]
@@ -43,7 +43,7 @@ for entry in entries:
         else:
             # we haven't seen this before, investigate
             print(response)
-            break
+            exit(1)
     result = json.loads(result_json)["result"]
 
     # resolve url characters
