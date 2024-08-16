@@ -10,9 +10,9 @@ entries = []
 # read all files
 har_directory = "har_sources"
 for filename in os.listdir(har_directory):
-    full_path = os.path.join(har_directory,filename)
+    full_path = os.path.join(har_directory, filename)
     if os.path.isfile(full_path):
-        with open(full_path,encoding="utf-8") as f:
+        with open(full_path, encoding="utf-8") as f:
             net_logs = json.load(f)
             entries.extend(net_logs["log"]["entries"])
 
@@ -53,7 +53,7 @@ for entry in entries:
         continue
 
     # resolve url characters
-    combo = tuple(unquote(w) for w in (first,second,result))
+    combo = tuple(unquote(w) for w in (first, second, result))
     if (combo[0], combo[1]) in recipes.keys() and recipes[(combo[0], combo[1])] != combo[2]:
         print("Found differing recipes.")
         exit(1)
@@ -65,15 +65,16 @@ for entry in entries:
     elements.update(combo)
 
     # count for debugging purposes only
-    count = count+1
+    count = count + 1
 # print(recipes)
 
 print("Total Elements: " + str(len(elements)))
-print("Total Recipes: " + str(len(recipes)/2))
+print("Total Recipes: " + str(len(recipes) / 2))
 
 starting_elements = {"Water", "Fire", "Wind", "Earth"}
 
-def print_all_iterations(interactive = False):
+
+def print_all_iterations(interactive=False):
     if interactive:
         print("Type q to quit.")
 
@@ -92,14 +93,14 @@ def print_all_iterations(interactive = False):
         new_elements = set()
         for fe in curr_elements:
             for se in curr_elements:
-                fese = (fe,se)
+                fese = (fe, se)
                 if fese not in already_checked and fese in recipes:
-                    res = recipes[(fe,se)]
+                    res = recipes[(fe, se)]
                     if res not in curr_elements and res not in new_elements:
                         reactions.append(fe + " + " + se + " = " + res)
                         new_elements.add(res)
-                        already_checked.add((fe,se))
-                        already_checked.add((se,fe))
+                        already_checked.add((fe, se))
+                        already_checked.add((se, fe))
 
         print("Iteration " + str(iteration))
         print("\tStarting Elements: " + str(curr_elements))
@@ -115,6 +116,7 @@ def print_all_iterations(interactive = False):
         else:
             if interactive:
                 inp = input()
+
 
 def find_shortest_path_to(destination):
     curr_elements = {}
@@ -134,7 +136,7 @@ def find_shortest_path_to(destination):
             for se in curr_elements:
                 fese = (fe, se)
                 if fese not in already_checked and fese in recipes:
-                    res = recipes[(fe,se)]
+                    res = recipes[(fe, se)]
                     if res not in curr_elements and res not in new_elements:
                         # gen path to result
                         path_to_new_element = curr_elements[fe].copy()
@@ -157,12 +159,12 @@ def find_shortest_path_to(destination):
                                 if found_first == False or found_second == False:
                                     path_to_new_element.append(ser)
                         # add current recipe to path
-                        path_to_new_element.append((fe,se,res))
+                        path_to_new_element.append((fe, se, res))
                         # add result to new elements
                         new_elements[res] = path_to_new_element
 
-                        already_checked.add((fe,se))
-                        already_checked.add((se,fe))
+                        already_checked.add((fe, se))
+                        already_checked.add((se, fe))
 
         print("Iteration " + str(iteration))
         print("\tStarting Elements: " + str(curr_elements.keys()))
@@ -171,7 +173,7 @@ def find_shortest_path_to(destination):
 
         if destination in new_elements:
             print("")
-            print('Created "' + destination + '" in ' + str(len(new_elements[destination])-1) + ' steps.')
+            print('Created "' + destination + '" in ' + str(len(new_elements[destination]) - 1) + ' steps.')
             print("Reactions: ")
             for reaction in new_elements[destination]:
                 if not reaction:
@@ -179,28 +181,30 @@ def find_shortest_path_to(destination):
                 print("\t" + reaction[0] + " + " + reaction[1] + " = " + reaction[2])
             break
 
-        curr_elements = curr_elements | new_elements    # merge dicts
+        curr_elements = curr_elements | new_elements  # merge dicts
 
         if len(new_elements) == 0:
             print("No more new elements.")
             break
 
-def print_missing_combos(interactive = False):
+
+def print_missing_combos(interactive=False):
     if interactive:
         print("Type q to quit")
 
     checked = set()
     for first_el in elements:
         for second_el in elements:
-            if (first_el,second_el) not in recipes:
+            if (first_el, second_el) not in recipes:
                 print(first_el + " + " + second_el + " = ???")
         if interactive:
             if input() == "q":
                 break
 
+
 start = time.time()
-print_all_iterations()
+# print_all_iterations()
 # find_shortest_path_to("Sharktopusnado 9688")
-# print_missing_combos()
+print_missing_combos()
 end = time.time()
-print(end-start)
+print(end - start)
