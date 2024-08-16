@@ -2,9 +2,9 @@ import itertools
 import json
 import base64
 from urllib.parse import unquote
-import pandas as pd
 import os
 import time
+import matplotlib.pyplot as plt
 
 entries = []
 # read all files
@@ -74,7 +74,7 @@ print("Total Recipes: " + str(len(recipes) / 2))
 starting_elements = {"Water", "Fire", "Wind", "Earth"}
 
 
-def print_all_iterations(interactive=False):
+def print_all_iterations(interactive=False, freq_graph=False):
     if interactive:
         print("Type q to quit.")
 
@@ -82,6 +82,11 @@ def print_all_iterations(interactive=False):
     curr_elements = starting_elements.copy()
     print("Iteration 0")
     print(curr_elements)
+    graph_x = []
+    graph_y = []
+    if freq_graph:
+        graph_x.append(0)
+        graph_y.append(len(curr_elements))
 
     inp = "something"
     iteration = 0
@@ -108,6 +113,10 @@ def print_all_iterations(interactive=False):
             print("\t\t" + reaction)
         print("\tNew Elements: " + str(new_elements))
 
+        if freq_graph:
+            graph_x.append(iteration)
+            graph_y.append(len(new_elements))
+
         curr_elements = curr_elements.union(new_elements)
 
         if len(new_elements) == 0:
@@ -116,6 +125,14 @@ def print_all_iterations(interactive=False):
         else:
             if interactive:
                 inp = input()
+
+    if freq_graph:
+        plt.xkcd()
+        plt.xlabel("Iteration")
+        plt.ylabel("Count")
+        plt.title("Number of new elements over time")
+        plt.plot(graph_x, graph_y)
+        plt.show()
 
 
 def find_shortest_path_to(destination):
@@ -203,8 +220,8 @@ def print_missing_combos(interactive=False):
 
 
 start = time.time()
-# print_all_iterations()
-# find_shortest_path_to("Sharktopusnado 9688")
-print_missing_combos()
+print_all_iterations(interactive=False, freq_graph=True)
+# find_shortest_path_to("Fukushima")
+# print_missing_combos()
 end = time.time()
 print(end - start)
