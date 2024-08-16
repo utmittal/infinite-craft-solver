@@ -184,5 +184,5 @@ def print_missing_combos():
         input()
 
 # print_all_iterations()
-find_shortest_path_to("Obsidian")
+find_shortest_path_to("Ring")
 # print_missing_combos()
