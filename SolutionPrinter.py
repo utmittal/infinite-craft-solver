@@ -63,6 +63,12 @@ elements = list(elements)
 icmat = pd.DataFrame(index=elements, columns=elements)
 icmat = icmat.fillna("")
 for recipe in recipes:
+    if icmat.at[recipe[0],recipe[1]] != recipe[2] and icmat.at[recipe[0],recipe[1]] != "":
+        print("Found differing recipes.")
+        exit(1)
+    if icmat.at[recipe[1], recipe[0]] != recipe[2] and icmat.at[recipe[1], recipe[0]] != "":
+        print("Found differing recipes.")
+        exit(1)
     icmat.at[recipe[0],recipe[1]] = recipe[2]
     icmat.at[recipe[1], recipe[0]] = recipe[2]
 # print(icmat)
@@ -178,5 +184,5 @@ def print_missing_combos():
         input()
 
 # print_all_iterations()
-# find_shortest_path_to("Steam Disaster")
-print_missing_combos()
+find_shortest_path_to("Human")
+# print_missing_combos()
