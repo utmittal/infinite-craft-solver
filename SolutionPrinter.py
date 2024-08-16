@@ -3,6 +3,7 @@ import base64
 from urllib.parse import unquote
 import pandas as pd
 import os
+import time
 
 entries = []
 # read all files
@@ -106,8 +107,8 @@ def print_all_iterations():
         if len(new_elements) == 0:
             print("No more new elements.")
             break
-        else:
-            inp = input()
+        # else:
+        #     inp = input()
 
 def find_shortest_path_to(destination):
     starting_elements = ["Water", "Fire", "Wind", "Earth"]
@@ -183,6 +184,9 @@ def print_missing_combos():
                 print(first_el + " + " + second_el + " = ???")
         input()
 
-# print_all_iterations()
-find_shortest_path_to("Ring")
+start = time.time()
+print_all_iterations()
+# find_shortest_path_to("Ring")
 # print_missing_combos()
+end = time.time()
+print(end-start)
