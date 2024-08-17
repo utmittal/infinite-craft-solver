@@ -235,9 +235,9 @@ def print_dag():
     dot.render(directory="dags", view=True)
 
 start = time.time()
-# print_all_iterations(interactive=False, freq_graph=False)
+print_all_iterations(interactive=False, freq_graph=True)
 # find_shortest_path_to("Fukushima")
 # print_missing_combos()
-print_dag()
+# print_dag()
 end = time.time()
 print(end - start)
