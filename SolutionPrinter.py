@@ -258,7 +258,15 @@ def suggest_combos():
             for se in curr_elements:
                 fese = (fe, se)
                 if fese not in recipes and fese not in nothing_recipes:
-                    suggestions.add(fe + " + " + se + " = ???")
+                    add = True
+                    # filter out if we already have something starting with this element so
+                    # that the suggestions are more varied
+                    for sugstr in suggestions:
+                        if fe in sugstr or se in sugstr:
+                            add = False
+                            break
+                    if add:
+                        suggestions.add(fese)
                     if len(suggestions) > 10:
                         break
                 if fese not in already_checked and fese in recipes:
@@ -279,7 +287,7 @@ def suggest_combos():
     print("--------------------------------------------------------")
     print("Suggestions")
     for sug in suggestions:
-        print(sug)
+        print(sug[0] + " + " + sug[1] + " = ???")
 
 start = time.time()
 # print_all_iterations(interactive=False, freq_graph=True)
