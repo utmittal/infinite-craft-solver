@@ -1,10 +1,10 @@
-import itertools
 import json
 import base64
 from urllib.parse import unquote
 import os
 import time
 import matplotlib.pyplot as plt
+from graphviz import Digraph
 
 entries = []
 # read all files
@@ -218,10 +218,26 @@ def print_missing_combos(interactive=False):
             if input() == "q":
                 break
 
+def print_dag():
+    dot = Digraph()
+    for node in elements:
+        dot.node(node)
+    for edge in recipes:
+        dot.edge(edge[0],recipes[edge])
+        dot.edge(edge[1],recipes[edge])
+
+    # dot.node("Fire")
+    # dot.edge("Water",recipes[("Water","Water")])
+    # dot.edge("Water",recipes[("Water","Earth")])
+    # dot.edge("Earth", recipes[("Water", "Earth")])
+
+    print(dot.source)
+    dot.render(directory="dags", view=True)
 
 start = time.time()
-print_all_iterations(interactive=False, freq_graph=True)
+# print_all_iterations(interactive=False, freq_graph=False)
 # find_shortest_path_to("Fukushima")
 # print_missing_combos()
+print_dag()
 end = time.time()
 print(end - start)
