@@ -135,7 +135,7 @@ def print_all_iterations(interactive=False, freq_graph=False):
         plt.xlabel("Iteration")
         plt.ylabel("Count")
         plt.title("Number of new elements over time")
-        plt.axis((0,70,0,100))
+        plt.axis((0,70,0,150))
         plt.plot(graph_x, graph_y)
         plt.savefig("freq_graphs/" + time.strftime("%Y%m%d_%H%M%S") + ".png", bbox_inches='tight')
         # plt.show()
@@ -294,7 +294,7 @@ def suggest_combos():
         print(sug[0] + " + " + sug[1] + " = ???")
 
 start = time.time()
-print_all_iterations(interactive=False, freq_graph=True)
+# print_all_iterations(interactive=False, freq_graph=True)
 find_shortest_path_to("Hulk Spaghetti")
 # print_missing_combos(interactive=False)
 # suggest_combos()
