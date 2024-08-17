@@ -150,7 +150,6 @@ def find_shortest_path_to(destination):
     print(curr_elements.keys())
 
     iteration = 0
-    already_checked = set()
     while True:
         iteration += 1
 
@@ -159,35 +158,40 @@ def find_shortest_path_to(destination):
             for se in curr_elements:
                 fese = (fe, se)
                 if fese in recipes:
-                    res = recipes[(fe, se)]
-                    if res not in curr_elements and res not in new_elements:
-                        # gen path to result
-                        path_to_new_element = curr_elements[fe].copy()
-                        # insert at the right places
-                        for ser in curr_elements[se]:
-                            if ser not in path_to_new_element:
-                                found_first = False
-                                found_second = False
-                                for i in range(len(path_to_new_element)):
-                                    r = path_to_new_element[i]
-                                    if r == ():
-                                        continue
-                                    if r[2] == ser[0]:
-                                        found_first = True
-                                    if r[2] == ser[1]:
-                                        found_second = True
-                                    if found_first and found_second:
-                                        path_to_new_element.insert(i + 1, ser)
-                                        break
-                                if found_first == False or found_second == False:
-                                    path_to_new_element.append(ser)
-                        # add current recipe to path
-                        path_to_new_element.append((fe, se, res))   # not an error
+                    res = recipes[fese]
+                    # gen path to result
+                    path_to_new_element = curr_elements[fe].copy()
+                    for ser in curr_elements[se]:
+                        if ser not in path_to_new_element:
+                            found_first = False
+                            found_second = False
+                            for i in range(len(path_to_new_element)):
+                                r = path_to_new_element[i]
+                                if r == ():
+                                    continue
+                                if r[2] == ser[0]:
+                                    found_first = True
+                                if r[2] == ser[1]:
+                                    found_second = True
+                                if found_first and found_second:
+                                    path_to_new_element.insert(i + 1, ser)
+                                    break
+                            if found_first == False or found_second == False:
+                                path_to_new_element.append(ser)
+                    # add current combo to path
+                    path_to_new_element.append((fe, se, res))
+
+                    if res in curr_elements:
+                        existing_res_path = curr_elements[res]
+                        if len(path_to_new_element) < len(existing_res_path):
+                            curr_elements[res] = path_to_new_element.copy()
+                    elif res in new_elements:
+                        existing_res_path = new_elements[res]
+                        if len(path_to_new_element) < len(existing_res_path):
+                            new_elements[res] = path_to_new_element.copy()
+                    else:
                         # add result to new elements
                         new_elements[res] = path_to_new_element
-
-                        already_checked.add((fe, se))
-                        already_checked.add((se, fe))
 
         print("Iteration " + str(iteration))
         print("\tStarting Elements: " + str(curr_elements.keys()))
