@@ -158,7 +158,7 @@ def find_shortest_path_to(destination):
         for fe in curr_elements:
             for se in curr_elements:
                 fese = (fe, se)
-                if fese not in already_checked and fese in recipes:
+                if fese in recipes:
                     res = recipes[(fe, se)]
                     if res not in curr_elements and res not in new_elements:
                         # gen path to result
