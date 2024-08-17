@@ -150,69 +150,84 @@ def find_shortest_path_to(destination):
     print(curr_elements.keys())
 
     iteration = 0
+    # already_checked = set()
     while True:
         iteration += 1
 
         new_elements = {}
-        for fe in curr_elements:
-            for se in curr_elements:
-                fese = (fe, se)
-                if fese in recipes:
-                    res = recipes[fese]
-                    # gen path to result
-                    path_to_new_element = curr_elements[fe].copy()
-                    for ser in curr_elements[se]:
-                        if ser not in path_to_new_element:
-                            found_first = False
-                            found_second = False
-                            for i in range(len(path_to_new_element)):
-                                r = path_to_new_element[i]
-                                if r == ():
-                                    continue
-                                if r[2] == ser[0]:
-                                    found_first = True
-                                if r[2] == ser[1]:
-                                    found_second = True
-                                if found_first and found_second:
-                                    path_to_new_element.insert(i + 1, ser)
-                                    break
-                            if found_first == False or found_second == False:
-                                path_to_new_element.append(ser)
-                    # add current combo to path
-                    path_to_new_element.append((fe, se, res))
+        new_elements_2 = {}
+        while new_elements != new_elements_2 or (new_elements == {} and new_elements_2 == {}):
+            new_elements_2 = new_elements.copy()
+            new_elements = {}
+            for fe in curr_elements:
+                for se in curr_elements:
+                    fese = (fe, se)
+                    # if fese in already_checked:
+                    #     continue
+                    # else:
+                    #     already_checked.add(fese)
+                    #     already_checked.add((se,fe))
 
-                    if res in curr_elements:
-                        existing_res_path = curr_elements[res]
-                        if len(path_to_new_element) < len(existing_res_path):
-                            curr_elements[res] = path_to_new_element.copy()
-                    elif res in new_elements:
-                        existing_res_path = new_elements[res]
-                        if len(path_to_new_element) < len(existing_res_path):
-                            new_elements[res] = path_to_new_element.copy()
-                    else:
-                        # add result to new elements
-                        new_elements[res] = path_to_new_element
+                    if fese in recipes:
+                        res = recipes[fese]
+                        # gen path to result
+                        path_to_new_element = curr_elements[fe].copy()
+                        for ser in curr_elements[se]:
+                            if ser not in path_to_new_element:
+                                found_first = False
+                                found_second = False
+                                for i in range(len(path_to_new_element)):
+                                    r = path_to_new_element[i]
+                                    if r == ():
+                                        continue
+                                    if r[2] == ser[0]:
+                                        found_first = True
+                                    if r[2] == ser[1]:
+                                        found_second = True
+                                    if found_first and found_second:
+                                        path_to_new_element.insert(i + 1, ser)
+                                        break
+                                if found_first == False or found_second == False:
+                                    path_to_new_element.append(ser)
+                        # add current combo to path
+                        path_to_new_element.append((fe, se, res))
+
+                        if res in curr_elements:
+                            existing_res_path = curr_elements[res]
+                            if len(path_to_new_element) < len(existing_res_path):
+                                curr_elements[res] = path_to_new_element.copy()
+                        elif res in new_elements:
+                            existing_res_path = new_elements[res]
+                            if len(path_to_new_element) < len(existing_res_path):
+                                new_elements[res] = path_to_new_element.copy()
+                        else:
+                            # add result to new elements
+                            new_elements[res] = path_to_new_element
+
+            if len(new_elements) == 0:
+                break
 
         print("Iteration " + str(iteration))
         print("\tStarting Elements: " + str(curr_elements.keys()))
         print("\tNew Elements: " + str(new_elements.keys()))
         # print("\tNew Element Paths" + str(new_elements))
 
-        if destination in new_elements:
-            print("")
-            print('Created "' + destination + '" in ' + str(len(new_elements[destination]) - 1) + ' steps.')
-            print("Reactions: ")
-            for reaction in new_elements[destination]:
-                if not reaction:
-                    continue
-                print("\t" + reaction[0] + " + " + reaction[1] + " = " + reaction[2])
-            break
-
         curr_elements = curr_elements | new_elements  # merge dicts
 
         if len(new_elements) == 0:
             print("No more new elements.")
             break
+
+    if destination in curr_elements:
+        print("")
+        print('Created "' + destination + '" in ' + str(len(curr_elements[destination]) - 1) + ' steps.')
+        print("Reactions: ")
+        for reaction in curr_elements[destination]:
+            if not reaction:
+                continue
+            print("\t" + reaction[0] + " + " + reaction[1] + " = " + reaction[2])
+    else:
+        print("Couldn't find path to specified element.")
 
 
 def print_missing_combos(interactive=False):
@@ -295,7 +310,7 @@ def suggest_combos():
 
 start = time.time()
 # print_all_iterations(interactive=False, freq_graph=True)
-find_shortest_path_to("Hulk Spaghetti")
+find_shortest_path_to("Reef")
 # print_missing_combos(interactive=False)
 # suggest_combos()
 # print_dag()
