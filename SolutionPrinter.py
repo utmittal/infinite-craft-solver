@@ -138,7 +138,7 @@ def print_all_iterations(interactive=False, freq_graph=False):
         plt.axis((0,70,0,100))
         plt.plot(graph_x, graph_y)
         plt.savefig("freq_graphs/" + time.strftime("%Y%m%d_%H%M%S") + ".png", bbox_inches='tight')
-        plt.show()
+        # plt.show()
 
 
 def find_shortest_path_to(destination):
