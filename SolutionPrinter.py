@@ -17,6 +17,7 @@ for filename in os.listdir(har_directory):
             entries.extend(net_logs["log"]["entries"])
 
 recipes = {}
+nothing_recipes = {}    # for use in specific methods
 elements = set()
 # parse all entries
 count = 0
@@ -48,12 +49,15 @@ for entry in entries:
             exit(1)
     result = json.loads(result_json)["result"]
 
-    # if result is Nothing, we don't add it to recipes. This makes future lookups simpler
-    if result == "Nothing":
-        continue
-
     # resolve url characters
     combo = tuple(unquote(w) for w in (first, second, result))
+
+    # if result is Nothing, we don't add it to recipes. This makes future lookups simpler
+    if result == "Nothing":
+        nothing_recipes[(combo[0], combo[1])] = combo[2]
+        nothing_recipes[(combo[1], combo[0])] = combo[2]
+        continue
+
     if (combo[0], combo[1]) in recipes.keys() and recipes[(combo[0], combo[1])] != combo[2]:
         print("Found differing recipes.")
         exit(1)
@@ -178,7 +182,7 @@ def find_shortest_path_to(destination):
                                 if found_first == False or found_second == False:
                                     path_to_new_element.append(ser)
                         # add current recipe to path
-                        path_to_new_element.append((fe, se, res))
+                        path_to_new_element.append((fe, se, res))   # not an error
                         # add result to new elements
                         new_elements[res] = path_to_new_element
 
@@ -236,10 +240,52 @@ def print_dag():
     print(dot.source)
     dot.render(directory="dags", view=True)
 
+def suggest_combos():
+    curr_elements = starting_elements.copy()
+    print("Iteration 0")
+    print(curr_elements)
+
+    iteration = 0
+    already_checked = set()
+    suggestions = set()
+    while len(suggestions) <= 10:
+        iteration += 1
+        print("Iteration " + str(iteration))
+
+        reactions = []
+        new_elements = set()
+        for fe in curr_elements:
+            for se in curr_elements:
+                fese = (fe, se)
+                if fese not in recipes and fese not in nothing_recipes:
+                    suggestions.add(fe + " + " + se + " = ???")
+                    if len(suggestions) > 10:
+                        break
+                if fese not in already_checked and fese in recipes:
+                    res = recipes[(fe, se)]
+                    if res not in curr_elements and res not in new_elements:
+                        reactions.append(fe + " + " + se + " = " + res)
+                        new_elements.add(res)
+                        already_checked.add((fe, se))
+                        already_checked.add((se, fe))
+            if len(suggestions) > 10:
+                break
+
+        curr_elements = curr_elements.union(new_elements)
+
+        if len(new_elements) == 0:
+            break
+
+    print("--------------------------------------------------------")
+    print("Suggestions")
+    for sug in suggestions:
+        print(sug)
+
 start = time.time()
-print_all_iterations(interactive=False, freq_graph=True)
-# find_shortest_path_to("Emma Watson")
+# print_all_iterations(interactive=False, freq_graph=True)
+# find_shortest_path_to("Pasta Pandaemonium")
 # print_missing_combos()
+suggest_combos()
 # print_dag()
 end = time.time()
 print(end - start)
