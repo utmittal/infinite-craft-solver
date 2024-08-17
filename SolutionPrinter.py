@@ -237,7 +237,7 @@ def print_dag():
 
 start = time.time()
 print_all_iterations(interactive=False, freq_graph=True)
-# find_shortest_path_to("Fukushima")
+# find_shortest_path_to("Emma Watson")
 # print_missing_combos()
 # print_dag()
 end = time.time()
