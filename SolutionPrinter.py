@@ -295,8 +295,8 @@ def suggest_combos():
 
 start = time.time()
 print_all_iterations(interactive=False, freq_graph=True)
-# find_shortest_path_to("Pasta Pandaemonium")
-# print_missing_combos()
+find_shortest_path_to("Hulk Spaghetti")
+# print_missing_combos(interactive=False)
 # suggest_combos()
 # print_dag()
 end = time.time()
