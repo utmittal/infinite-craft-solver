@@ -308,11 +308,31 @@ def suggest_combos():
     for sug in suggestions:
         print(sug[0] + " + " + sug[1] + " = ???")
 
+def suggest_most_used():
+    counter = {}
+    for p in elements:
+        for q in recipes:
+            if p in q:
+                if p in counter:
+                    counter[p] += 1
+                else:
+                    counter[p] = 1
+
+    tups = []
+    for c23 in counter:
+        tups.append((c23,counter[c23]))
+
+    sorted_tups = sorted(tups, key=lambda tup: tup[1], reverse = True)
+    print(sorted_tups[0:10])
+
+
+
 start = time.time()
-# print_all_iterations(interactive=False, freq_graph=True)
-find_shortest_path_to("Reef")
+print_all_iterations(interactive=False, freq_graph=True)
+# find_shortest_path_to("Reef")
 # print_missing_combos(interactive=False)
 # suggest_combos()
+# suggest_most_used()
 # print_dag()
 end = time.time()
 print(end - start)
