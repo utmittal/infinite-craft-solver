@@ -52,6 +52,14 @@ for entry in entries:
     # resolve url characters
     combo = tuple(unquote(w) for w in (first, second, result))
 
+    # filer out sharktopusnado because it's uninteresting
+    if combo[0].startswith("Sharktopusnado"):
+        continue
+    if combo[1].startswith("Sharktopusnado"):
+        continue
+    if combo[2].startswith("Sharktopusnado"):
+        continue
+
     # if result is Nothing, we don't add it to recipes. This makes future lookups simpler
     if result == "Nothing":
         nothing_recipes[(combo[0], combo[1])] = combo[2]
@@ -135,7 +143,7 @@ def print_all_iterations(interactive=False, freq_graph=False):
         plt.xlabel("Iteration")
         plt.ylabel("Count")
         plt.title("Number of new elements over time")
-        plt.axis((0,70,0,150))
+        plt.axis((0,50,0,150))
         plt.plot(graph_x, graph_y)
         plt.savefig("freq_graphs/" + time.strftime("%Y%m%d_%H%M%S") + ".png", bbox_inches='tight')
         # plt.show()
